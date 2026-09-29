@@ -273,7 +273,11 @@ fn positionAtTopCenter(window: *glfw.GLFWwindow) void {
     var w: c_int = 0;
     var h: c_int = 0;
     glfw.glfwGetMonitorWorkarea(monitor, &x, &y, &w, &h);
-    glfw.glfwSetWindowPos(window, x + @divTrunc(w - Overlay.width, 2), y + @min(h, 42));
+    const overlay_y = if (builtin.os.tag == .macos)
+        y + h - Overlay.height - 42
+    else
+        y + @min(h, 42);
+    glfw.glfwSetWindowPos(window, x + @divTrunc(w - Overlay.width, 2), overlay_y);
 }
 
 fn color(value: Color) void {
