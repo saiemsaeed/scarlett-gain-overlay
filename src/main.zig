@@ -38,6 +38,7 @@ pub fn main(init: std.process.Init) !void {
             };
             for (current, 0..) |gain, index| {
                 if (gain != previous[index]) {
+                    std.log.info("input {d} gain changed: {d} dB -> {d} dB", .{ index + 1, previous[index], gain });
                     overlay.show(@intCast(index + 1), gain);
                 }
             }

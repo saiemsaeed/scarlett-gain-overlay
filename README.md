@@ -29,10 +29,10 @@ brew install zig libusb
 open "/Applications/Scarlett Gain Overlay.app"
 ```
 
-The app has no Dock icon. To quit it:
+The installer also adds a per-user LaunchAgent so the overlay starts automatically after login. The app has no Dock icon. To stop it:
 
 ```sh
-pkill -x scarlett-gain-overlay
+launchctl bootout gui/$(id -u)/dev.saiem.scarlett-gain-overlay
 ```
 
 ## Linux

@@ -21,6 +21,7 @@ pub fn build(b: *std.Build) void {
 
     exe.root_module.addIncludePath(b.path("vendor/glfw/include"));
     exe.root_module.addIncludePath(b.path("vendor/glfw/src"));
+    const glfw_platform_define = if (target.result.os.tag == .macos) "-D_GLFW_COCOA" else "-D_GLFW_X11";
     const glfw_common_sources = [_][]const u8{
         "context.c", "egl_context.c", "init.c", "input.c", "monitor.c",
         "null_init.c", "null_joystick.c", "null_monitor.c", "null_window.c",
@@ -30,11 +31,18 @@ pub fn build(b: *std.Build) void {
     for (glfw_common_sources) |source| {
         exe.root_module.addCSourceFile(.{
             .file = b.path(b.fmt("vendor/glfw/src/{s}", .{source})),
-            .flags = &.{"-O2"},
+            .flags = &.{ "-O2", glfw_platform_define },
         });
     }
 
-    exe.root_module.linkSystemLibrary("usb-1.0", .{});
+    const local_libusb = b.option(bool, "local-libusb", "Use the locally extracted macOS libusb archive") orelse false;
+    if (local_libusb and target.result.os.tag == .macos) {
+        exe.root_module.addIncludePath(b.path(".deps/libusb/1.0.30/include/libusb-1.0"));
+        exe.root_module.addObjectFile(b.path(".deps/libusb/1.0.30/lib/libusb-1.0.a"));
+    } else {
+        exe.root_module.linkSystemLibrary("usb-1.0", .{});
+    }
+
     if (target.result.os.tag == .macos) {
         const cocoa_sources = [_][]const u8{
             "cocoa_init.m", "cocoa_joystick.m", "cocoa_monitor.m",
